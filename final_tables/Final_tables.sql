@@ -1,16 +1,24 @@
 -- Final tables --
 
+-- Creating schemas
+Create schema Production
+Create schema Sales
+    
 -- Creating final tables
 
-Create table categories (
+Create table Production.categories (
     category_id int Primary key,
     category_name varchar(255) not null);
 
-Create table brands (
+Select * from Production.categories
+
+Create table Production.brands (
     brand_id int Primary key,
     brand_name varchar(255) not null);
 
-Create table products (
+Select * from Production.brands
+
+Create table Production.products (
     product_id int Primary key,
     product_name varchar(255) not null,
     brand_id int not null,
@@ -20,7 +28,9 @@ Create table products (
     Constraint fk_products_brand Foreign key (brand_id) references brands(brand_id),
     Constraint fk_products_category Foreign key (category_id) references categories(category_id));
 
-Create table stores (
+Select * from Production.products
+
+Create table sales.stores (
     store_id int Primary key,
     store_name varchar(255) not null,
     phone varchar(50),
@@ -30,7 +40,9 @@ Create table stores (
     state varchar(100),
     zip_code varchar(20));
 
-Create table staffs (
+Select * from sales.stores
+
+Create table sales.staffs (
     staff_id int Primary key,
     first_name varchar(100) not null,
     last_name varchar(100) not null,
@@ -42,7 +54,9 @@ Create table staffs (
     Constraint fk_staffs_store Foreign key (store_id) references stores(store_id),
     Constraint fk_staffs_manager Foreign key (manager_id) references staffs(staff_id));
 
-Create table customers (
+Select * from sales.staffs
+
+Create table sales.customers (
     customer_id int Primary key,
     first_name varchar(100) not null,
     last_name varchar(100) not null,
@@ -53,7 +67,9 @@ Create table customers (
     state varchar(100),
     zip_code varchar(20));
 
-Create table orders (
+Select * from sales.customers
+
+Create table sales.orders (
     order_id int Primary key,
     customer_id int not null,
     order_status int not null,
@@ -66,7 +82,9 @@ Create table orders (
     Constraint fk_orders_store Foreign key (store_id) references stores(store_id),
     Constraint fk_orders_staff Foreign key (staff_id) references staffs(staff_id));
 
-Create table order_items (
+Select * from sales.orders
+
+Create table sales.order_items (
     order_id int not null,
     item_id int not null,
     product_id int not null,
@@ -77,7 +95,9 @@ Create table order_items (
     Constraint fk_orderitems_order Foreign key (order_id) references orders(order_id),
     Constraint fk_orderitems_product Foreign key (product_id) references products(product_id));
 
-Create table stocks (
+Select * from sales.order_items
+
+Create table production.stocks (
     store_id int not null,
     product_id int not null,
     quantity int not null,
@@ -85,33 +105,35 @@ Create table stocks (
     Constraint fk_stocks_store Foreign key (store_id) references stores(store_id),
     Constraint fk_stocks_product Foreign key (product_id) references products(product_id));
 
+Select * from production.stocks
+
 
 -- Inserting data from staging tables to final tables
 
-Insert into categories 
+Insert into production.categories 
 Select * from staging.stg_categories;
 
-Select * from categories
+Select * from production.categories
 
-Insert into brands 
+Insert into production.brands 
 Select * from staging.stg_brands;
 
-Select * from brands
+Select * from production.brands
 
 
-Insert into products 
+Insert into production.products 
 Select * from staging.stg_products;
 
-Select * from products
+Select * from production.products
 
 
-Insert into stores 
+Insert into sales.stores 
 Select * from staging.stg_stores;
 
-Select * from stores
+Select * from sales.stores
 
 
-Insert into staffs (staff_id, first_name, last_name, email, phone, active, store_id, manager_id)
+Insert into sales.staffs (staff_id, first_name, last_name, email, phone, active, store_id, manager_id)
 Select
     staff_id,
     first_name,
@@ -125,10 +147,10 @@ Case
     Else manager_id
 End manager_id from staging.stg_staffs;
 
-Select * from staffs
+Select * from sales.staffs
 
 
-Insert into customers (customer_id, first_name, last_name, phone, email, street, city, state, zip_code)
+Insert into sales.customers (customer_id, first_name, last_name, phone, email, street, city, state, zip_code)
 Select
     customer_id,
     first_name,
@@ -141,10 +163,10 @@ Select
     zip_code
 From staging.stg_customers;
 
-Select * from customers
+Select * from sales.customers
 
 
-Insert into orders (order_id, customer_id, order_status, order_date, required_date, shipped_date, store_id, staff_id)
+Insert into sales.orders (order_id, customer_id, order_status, order_date, required_date, shipped_date, store_id, staff_id)
 Select
     order_id,
     customer_id,
@@ -156,9 +178,9 @@ Select
     staff_id
 from staging.stg_orders;
 
-Select * from orders
+Select * from sales.orders
 
-Insert into order_items (order_id, item_id, product_id, quantity, list_price, discount)
+Insert into sales.order_items (order_id, item_id, product_id, quantity, list_price, discount)
 Select
     order_id,
     item_id,
@@ -168,15 +190,16 @@ Select
     discount
 From staging.stg_order_items;
 
-Select * from order_items
+Select * from sales.order_items
 
-Insert into stocks (store_id, product_id, quantity)
+Insert into production.stocks (store_id, product_id, quantity)
 Select
     store_id,
     product_id,
     quantity
 From staging.stg_stocks;
 
-Select * from stocks
+Select * from production.stocks
+
 
 
