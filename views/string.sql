@@ -1,5 +1,8 @@
---task 1
-alter view vw_StoreSalesSummary as
+-- Views --
+
+-- vw_StoreSalesSummary
+
+Create view sales.vw_StoreSalesSummary as
 select
     s.store_id,
     s.store_name,
@@ -17,34 +20,33 @@ select
             sum(oi.list_price * oi.quantity * (1 - oi.discount)) / count(distinct o.customer_id), 2)
     end as revenue_per_customer 
 from
-    stores s
+    sales.stores s
 left join orders o on s.store_id = o.store_id
 left join order_items oi on o.order_id = oi.order_id
-group bys.store_id, s.store_name
+group by s.store_id, s.store_name
 
-select  * from  vw_StoreSalesSummary order by total_revenue desc
+select  * from  sales.vw_StoreSalesSummary order by total_revenue desc
 
+-- vw_TopSellingProducts
 
---task 2   
-alter view  vw_TopSellingProducts as 
+Create view  sales.vw_TopSellingProducts as 
 select p.product_id,
        p.[product_name],
 	   c.category_name,
        coalesce(sum(oi.quantity) , 0) as total_quantity,
 	   coalesce(sum(oi.list_price * oi.quantity * (1 - oi.discount)), 0 ) as total_revenue
-from  [products] p
-left join categories c on p.category_id = c.category_id
-left join [order_items] oi on p.product_id=oi.product_id
+from  production.[products] p
+left join production.categories c on p.category_id = c.category_id
+left join sales.[order_items] oi on p.product_id=oi.product_id
 left join [dbo].[orders] o on oi.order_id=o.order_id
-group byp.product_id,[product_name], c.category_name;
+group by p.product_id,[product_name], c.category_name;
 
-select  * from vw_TopSellingProducts
-order by 
-    total_quantity desc;
+select  * from sales.vw_TopSellingProducts
+order by  total_quantity desc;
 
+-- vw_InventoryStatus
 
---task 3     vw_InventoryStatus	Zaxirasi tugayotgan mahsulotlar  LEFT join [sales] sa on p.product_id = sa.product_id
-create view vw_InventoryStatus as 
+create view production.vw_InventoryStatus as 
 select 
 	p.product_id,
 	p.product_name,
@@ -56,17 +58,17 @@ select
         ) then 'Low products in stock'
         else 'Many products in stock'
     end as stock_status
-from products p
-left join  [stocks] s on p.product_id = s.product_id
-group byp.product_id,p.product_name
+from production.products p
+left join  production.[stocks] s on p.product_id = s.product_id
+group by p.product_id,p.product_name
 --HAVING COALESCE(sum(s.quantity), 0) < 10
 
-select * from vw_InventoryStatus
+select * from production.vw_InventoryStatus
 order by total_stock_quantity
 
---task 4   vw_StaffPerformance	Har bir xodim bo‘yicha buyurtma va daromad
+-- vw_StaffPerformance
 
-alter view vw_StaffPerformance as
+Create view sales.vw_StaffPerformance as
  select  
     s.staff_id,
     s.first_name + ' ' + s.last_name as StaffName,
@@ -74,35 +76,34 @@ alter view vw_StaffPerformance as
     count(o.order_id) as TotalOrders,
 	sum(oi.quantity * oi.list_price) as TotalRevenue
 from 
-    [staffs] s
-join orders o on s.staff_id = o.staff_id
-join order_items oi on o.order_id = oi.order_id
-left join [stores] st on s.store_id=st.store_id
-group bys.staff_id, s.first_name, s.last_name,st.[store_name];
+    sales.[staffs] s
+join sales.orders o on s.staff_id = o.staff_id
+join sales.order_items oi on o.order_id = oi.order_id
+left join sales.[stores] st on s.store_id=st.store_id
+group by s.staff_id, s.first_name, s.last_name,st.[store_name];
 
-select * from vw_StaffPerformance 
+select * from sales.vw_StaffPerformance 
 order by TotalRevenue desc;
 
+-- vw_RegionalTrends 
 
-
---task 5     vw_RegionalTrends	Shahar yoki mintaqa bo‘yicha daromad
-
- alter view vw_RegionalTrends as 
+ Create view sales.vw_RegionalTrends as 
  select 
 	c.city,
 	c.state,
 	count(distinct o.order_id) as total_orders  ,
 	sum(oi.quantity * oi.list_price)as TotalRevenue
- from customers c 
- join orders o on c.customer_id=o.customer_id
- join order_items oi on oi.order_id=o.order_id
+ from sales.customers c 
+ join sales.orders o on c.customer_id=o.customer_id
+ join sales.order_items oi on oi.order_id=o.order_id
  group by c.city,c.state;
 
- select * from vw_RegionalTrends
+ select * from sales.vw_RegionalTrends
  order by total_orders desc
 
- --
-create view vw_Top5RevenueByCityStore as
+ -- vw_Top5RevenueByCityStore
+
+ create view sales.vw_Top5RevenueByCityStore as
 select top 5
     c.city,
     c.state,
@@ -110,20 +111,20 @@ select top 5
     count(distinct o.order_id) as TotalOrders,
     sum(oi.quantity * oi.list_price) as TotalRevenue,
     format(sum(oi.quantity * oi.list_price), 'C', 'en-US') as TotalRevenueFormatted
-from customers c 
-	join orders o on c.customer_id = o.customer_id
-	join order_items oi on oi.order_id = o.order_id
-	join staffs st on o.staff_id = st.staff_id
-	join stores s on st.store_id = s.store_id
+from sales.customers c 
+	join sales.orders o on c.customer_id = o.customer_id
+	join sales.order_items oi on oi.order_id = o.order_id
+	join sales.staffs st on o.staff_id = st.staff_id
+	join sales.stores s on st.store_id = s.store_id
 group by c.city, c.state, s.store_name
 order by TotalRevenue desc;
 
- select * from vw_Top5RevenueByCityStore
+ select * from sales.vw_Top5RevenueByCityStore
 
+ -- vw_SalesByCategory
 
- --task6   vw_SalesByCategory	Har bir kategoriya bo‘yicha sotuv va foyda
-
-create view vw_SalesByCategory as 
+ 
+create view sales.vw_SalesByCategory as 
 select  
     c.category_id,
     c.category_name,
@@ -132,47 +133,11 @@ select
     sum(oi.list_price * oi.quantity * (1 - oi.discount)) as total_revenue,
     sum(oi.list_price * oi.quantity * oi.discount) as total_discount_amount,
     round(avg(oi.discount) * 100, 2) as avg_discount_percent
-from categories c  
-join products p on c.category_id = p.category_id
-join order_items oi on p.product_id = oi.product_id
-join orders o on oi.order_id = o.order_id
-group byc.category_id, c.category_name;
+from production.categories c  
+join production.products p on c.category_id = p.category_id
+join sales.order_items oi on p.product_id = oi.product_id
+join sales.orders o on oi.order_id = o.order_id
+group by c.category_id, c.category_name;
 
-select * from vw_SalesByCategory
+select * from sales.vw_SalesByCategory
 order by  total_orders desc;
-
-
-
-----
-create view vw_CustomerLifetimeValue as
-select 
-    c.customer_id,
-    c.first_name + ' ' + c.last_name as customer_name,
-    count(distinct o.order_id) as total_orders,
-    sum(oi.quantity * oi.list_price * (1 - oi.discount)) as total_revenue,
-    avg(oi.quantity * oi.list_price * (1 - oi.discount)) as avg_order_value
-
-from customers c
-join orders o on c.customer_id = o.customer_id
-join order_items oi on o.order_id = oi.order_id
-group byc.customer_id, c.first_name, c.last_name;
-
-select * from vw_CustomerLifetimeValue
-order by total_orders desc , total_revenue desc
-
----
-
-alter view vw_SalesTrendsMonthly as
-select 
-    year(o.order_date) as sales_year,MONTH(o.order_date) as sales_month,
-    DATENAME(MONTH, o.order_date) AS sales_month_name,
-    count(distinct o.order_id) as total_orders,
-    sum(oi.quantity * oi.list_price * (1 - oi.discount)) as total_revenue,
-	CAST(SUM(oi.quantity * oi.list_price * (1 - oi.discount)) / 
-         NULLIF(COUNT(DISTINCT o.order_id), 0) AS DECIMAL(10, 2)) AS avg_order_value
-from orders o
-join order_items oi on o.order_id = oi.order_id
-group by YEAR(o.order_date), MONTH(o.order_date),DATENAME(MONTH, o.order_date);
-
-select * from vw_SalesTrendsMonthly
-order by sales_year, sales_month;
