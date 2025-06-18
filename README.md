@@ -12,7 +12,6 @@ The purpose of the project is to:
 📁 Components:
 - SQL scripts for schema creation, staging, and final tables
 - KPI queries for fraud detection and customer insights
-- Power BI dashboard
 - Documentation and ERD
 
 🎯 Final deliverable: A fully populated and query-ready SQL database with dashboard visualizations that simulate a professional banking analytics solution.
