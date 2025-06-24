@@ -109,97 +109,132 @@ Select * from production.stocks
 
 
 -- Inserting data from staging tables to final tables
+INSERT INTO Core_Banking.Accounts
+SELECT * FROM [staging].[accounts];
 
-Insert into production.categories 
-Select * from staging.stg_categories;
+--ALTER TABLE Core_Banking.Branches
+--ALTER COLUMN [ContactNumber] VARCHAR(100); 
 
-Select * from production.categories
+-- 3. Transactions
+INSERT INTO Core_Banking.transactions
+SELECT * FROM staging.transactions;
 
-Insert into production.brands 
-Select * from staging.stg_brands;
+-- 4. Branches
+INSERT INTO final.branches
+SELECT * FROM staging.stg_branches;
 
-Select * from production.brands
+-- 5. Employees
+INSERT INTO Core_Banking.employees
+SELECT * FROM staging.employees;
 
+-- 6. CreditCards
+INSERT INTO Digital_Banking_Payments.CreditCards
+SELECT * FROM staging.credit_cards;
 
-Insert into production.products 
-Select * from staging.stg_products;
+-- 7. CreditCardTransactions
+INSERT INTO Digital_Banking_Payments.CreditCardTransactions
+SELECT * FROM staging.credit_card_transactions;
 
-Select * from production.products
+-- 8. OnlineBankingUsers
+INSERT INTO Digital_Banking_Payments.OnlineBankingUsers
+SELECT * FROM staging.online_banking_users;
 
+-- 9. BillPayments
+INSERT INTO Digital_Banking_Payments.BillPayments
+SELECT * FROM staging.bill_payments;
 
-Insert into sales.stores 
-Select * from staging.stg_stores;
+-- 10. MobileBankingTransactions
+INSERT INTO Digital_Banking_Payments.MobileBankingTransactions
+SELECT * FROM staging.mobile_banking_transactions;
 
-Select * from sales.stores
+-- 11. Loans
+INSERT INTO Loans_Credit.loans
+SELECT * FROM staging.loans;
 
+-- 12. LoanPayments
+INSERT INTO Loans_Credit.loanpayments
+SELECT * FROM staging.loan_payments;
 
-Insert into sales.staffs (staff_id, first_name, last_name, email, phone, active, store_id, manager_id)
-Select
-    staff_id,
-    first_name,
-    last_name,
-    email,
-    phone,
-    active,
-    store_id,
-Case 
-    When manager_id = 0 then NULL  
-    Else manager_id
-End manager_id from staging.stg_staffs;
+-- 13. CreditScores
+INSERT INTO Loans_Credit.creditscores
+SELECT * FROM staging.credit_scores;
 
-Select * from sales.staffs
+-- 14. DebtCollection
+INSERT INTO Loans_Credit.debtcollection
+SELECT * FROM staging.debt_collection;
 
+-- 15. KYC
+INSERT INTO Compliance_Risk.kyc
+SELECT * FROM staging.kyc;
 
-Insert into sales.customers (customer_id, first_name, last_name, phone, email, street, city, state, zip_code)
-Select
-    customer_id,
-    first_name,
-    last_name,
-    phone,
-    email,
-    street,
-    city,
-    state,
-    zip_code
-From staging.stg_customers;
+-- 16. FraudDetection
+INSERT INTO Compliance_Risk.frauddetection
+SELECT * FROM staging.fraud_detection;
 
-Select * from sales.customers
-
-
-Insert into sales.orders (order_id, customer_id, order_status, order_date, required_date, shipped_date, store_id, staff_id)
-Select
-    order_id,
-    customer_id,
-    order_status,
-    order_date,
-    required_date,
-    shipped_date,
-    store_id,
-    staff_id
-from staging.stg_orders;
-
-Select * from sales.orders
-
-Insert into sales.order_items (order_id, item_id, product_id, quantity, list_price, discount)
-Select
-    order_id,
-    item_id,
-    product_id,
-    quantity,
-    list_price,
-    discount
-From staging.stg_order_items;
-
-Select * from sales.order_items
-
-Insert into production.stocks (store_id, product_id, quantity)
-Select
-    store_id,
-    product_id,
-    quantity
-From staging.stg_stocks;
-
-Select * from production.stocks
+-- 17. AML Cases
+INSERT INTO Compliance_Risk.amlcases
+SELECT * FROM staging.aml_cases;
 
 
+--SELECT COLUMN_NAME, DATA_TYPE
+--FROM INFORMATION_SCHEMA.COLUMNS
+--WHERE TABLE_SCHEMA = 'staging' AND TABLE_NAME = 'aml_cases';
 
+--SELECT COLUMN_NAME, DATA_TYPE
+--FROM INFORMATION_SCHEMA.COLUMNS
+--WHERE TABLE_SCHEMA = 'Compliance_Risk' AND TABLE_NAME = 'amlcases';
+
+--ALTER TABLE Compliance_Risk.amlcases
+--ALTER COLUMN InvestigatorID nvarchar(100);
+
+-- 18. RegulatoryReports
+INSERT INTO Compliance_Risk.regulatoryreports
+SELECT * FROM staging.regulatory_reports;
+
+-- 19. Departments
+INSERT INTO Human_Resources.departments
+SELECT * FROM staging.departments;
+
+-- 20. Salaries
+INSERT INTO Human_Resources.salaries
+SELECT * FROM staging.salaries;
+
+-- 21. EmployeeAttendance
+INSERT INTO Human_Resources.employeeattendance
+SELECT * FROM staging.employee_attendance;
+
+-- 22. Investments
+INSERT INTO Investments_Treasury.investments
+SELECT * FROM staging.investments;
+
+-- 23. StockTradingAccounts
+INSERT INTO Investments_Treasury.stocktradingaccounts
+SELECT * FROM staging.stock_trading_accounts;
+
+-- 24. ForeignExchange
+INSERT INTO Investments_Treasury.foreignexchange
+SELECT * FROM staging.foreign_exchange;
+
+-- 25. InsurancePolicies
+INSERT INTO Insurance_Security.insurancepolicies
+SELECT * FROM staging.insurance_policies;
+
+-- 26. Claims
+INSERT INTO Insurance_Security.claims
+SELECT * FROM staging.claims;
+
+-- 27. UserAccessLogs
+INSERT INTO Insurance_Security.useraccesslogs
+SELECT * FROM staging.user_access_logs;
+
+-- 28. CyberSecurityIncidents
+INSERT INTO Insurance_Security.cybersecurityincidents
+SELECT * FROM staging.cybersecurity_incidents;
+
+-- 29. Merchants
+INSERT INTO Merchant_Services.merchants
+SELECT * FROM staging.merchants;
+
+-- 30. MerchantTransactions
+INSERT INTO Merchant_Services.merchanttransactions
+SELECT * FROM staging.merchant_transactions;
